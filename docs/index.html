@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KevinB's Display Tuner</title>
+<meta name="description" content="A tiny portable Windows app that gives an ordinary laptop screen an OLED-style picture for movies, auto-tuned to your panel.">
+<link rel="icon" href="icon.png">
+<style>
+  :root {
+    --bg: #f6f6f7; --card: #ffffff; --stroke: #e3e3e6; --text: #1b1b1f; --sub: #5d5d66;
+    --accent: #0067c0; --accent-soft: #e5f1fb; --code: #f0f0f3; --shadow: 0 1px 2px rgba(0,0,0,.05);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #1c1c1e; --card: #2a2a2c; --stroke: #3a3a3d; --text: #f2f2f2; --sub: #a3a3aa;
+      --accent: #60cdff; --accent-soft: #1f3442; --code: #232325; --shadow: none; }
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.65 "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif; }
+  main { max-width: 860px; margin: 0 auto; padding: 48px 16px 72px; }
+  h1 { font: 700 40px/1.15 "Segoe UI Variable Display", "Segoe UI", system-ui, sans-serif; margin: 0 0 12px; letter-spacing: -.01em; }
+  h2 { font-size: 24px; margin: 56px 0 12px; }
+  h3 { font-size: 17px; margin: 0 0 6px; }
+  p { margin: 0 0 14px; }
+  .lead { font-size: 19px; color: var(--sub); max-width: 640px; }
+  .hero { display: flex; gap: 20px; align-items: center; margin-bottom: 20px; }
+  .hero img { width: 72px; height: 72px; flex: none; }
+  .buttons { display: flex; gap: 12px; flex-wrap: wrap; margin: 24px 0 8px; }
+  .btn { display: inline-block; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 600; border: 1px solid var(--stroke); color: var(--text); background: var(--card); }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  @media (prefers-color-scheme: dark) { .btn.primary { color: #111; } }
+  .note { font-size: 14px; color: var(--sub); }
+  .shot { margin: 32px 0 0; text-align: center; }
+  .shot img { max-width: 100%; width: 420px; border-radius: 10px; border: 1px solid var(--stroke); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 14px; }
+  .card { background: var(--card); border: 1px solid var(--stroke); border-radius: 12px; padding: 18px 20px; box-shadow: var(--shadow); }
+  .card p { color: var(--sub); margin: 0; font-size: 15px; }
+  .table-wrap { overflow-x: auto; border: 1px solid var(--stroke); border-radius: 12px; background: var(--card); }
+  table { width: 100%; border-collapse: collapse; font-size: 15px; min-width: 520px; }
+  th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--stroke); }
+  th { font-weight: 600; color: var(--sub); font-size: 13px; text-transform: none; }
+  tr:last-child td { border-bottom: none; }
+  td.num { font-variant-numeric: tabular-nums; }
+  code { font-family: "Cascadia Code", Consolas, monospace; font-size: 14px; background: var(--code); padding: 2px 6px; border-radius: 5px; }
+  pre { background: var(--code); border: 1px solid var(--stroke); border-radius: 10px; padding: 14px 16px; overflow-x: auto; }
+  pre code { background: none; padding: 0; }
+  .diagram { background: var(--card); border: 1px solid var(--stroke); border-radius: 12px; padding: 16px; }
+  .diagram svg { width: 100%; height: auto; display: block; }
+  .diagram text { font: 13px "Segoe UI", system-ui, sans-serif; fill: var(--text); }
+  .diagram .sub { fill: var(--sub); font-size: 11.5px; }
+  .diagram .box { fill: var(--bg); stroke: var(--stroke); }
+  .diagram .hl { fill: var(--accent-soft); stroke: var(--accent); }
+  .diagram .arrow { stroke: var(--sub); stroke-width: 1.5; fill: none; marker-end: url(#a); }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; align-items: start; }
+  @media (max-width: 680px) { .two { grid-template-columns: 1fr; } h1 { font-size: 32px; } }
+  .curve svg { width: 100%; height: auto; }
+  .curve .axis { stroke: var(--stroke); }
+  .curve .ref { stroke: var(--sub); stroke-dasharray: 4 4; fill: none; }
+  .curve .line { stroke: var(--accent); stroke-width: 2.5; fill: none; }
+  .curve text { font: 11px "Segoe UI", system-ui, sans-serif; fill: var(--sub); }
+  .kbd { border: 1px solid var(--stroke); border-bottom-width: 2px; border-radius: 6px; padding: 1px 7px; font-size: 14px; background: var(--card); white-space: nowrap; }
+  footer { margin-top: 64px; color: var(--sub); font-size: 14px; }
+  a { color: var(--accent); }
+</style>
+</head>
+<body>
+<main>
+  <div class="hero">
+    <img src="icon.png" alt="">
+    <div>
+      <h1>KevinB's Display Tuner</h1>
+      <p class="lead">Give an ordinary laptop screen an OLED-style picture for movies. Richer color, deeper blacks, tuned automatically for your panel.</p>
+    </div>
+  </div>
+  <div class="buttons">
+    <a class="btn primary" href="https://github.com/KevinLeve/DisplayTuner/releases/latest">Download for Windows</a>
+    <a class="btn" href="https://github.com/KevinLeve/DisplayTuner">Source code</a>
+  </div>
+  <p class="note">Portable single file • Windows 10 / 11, 64-bit • free and open source (MIT)</p>
+  <div class="shot"><img src="screenshot.png" alt="KevinB's Display Tuner window with presets and sliders"></div>
+
+  <h2>What it does</h2>
+  <div class="grid">
+    <div class="card"><h3>Detects your screen</h3><p>Reads the data every display reports about itself (EDID): maker, model, and its red, green and blue primaries.</p></div>
+    <div class="card"><h3>Tunes the presets</h3><p>Washed-out, narrow-gamut panels get more color. Wide-gamut panels get little. OLED screens skip black deepening.</p></div>
+    <div class="card"><h3>Applies screen-wide</h3><p>Works in every app: browsers, video players, streaming sites. <span class="kbd">Ctrl</span> + <span class="kbd">Alt</span> + <span class="kbd">F</span> toggles it.</p></div>
+    <div class="card"><h3>Changes nothing permanently</h3><p>Exit the app and colors go straight back to normal. Settings live in a small file next to the exe.</p></div>
+  </div>
+
+  <h2>How it works</h2>
+  <div class="diagram">
+    <svg viewBox="0 0 820 200" role="img" aria-label="Pipeline: EDID is read, presets are tuned, then a color matrix and a gamma curve change the picture on screen">
+      <defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="currentColor" style="color: var(--sub)"/></marker></defs>
+      <rect class="box" x="10" y="70" width="150" height="62" rx="10"/>
+      <text x="85" y="97" text-anchor="middle">Display EDID</text>
+      <text class="sub" x="85" y="116" text-anchor="middle">name, color primaries</text>
+      <rect class="box" x="210" y="70" width="150" height="62" rx="10"/>
+      <text x="285" y="97" text-anchor="middle">Auto-tune</text>
+      <text class="sub" x="285" y="116" text-anchor="middle">gamut vs sRGB, OLED?</text>
+      <rect class="box" x="410" y="70" width="150" height="62" rx="10"/>
+      <text x="485" y="97" text-anchor="middle">Preset + sliders</text>
+      <text class="sub" x="485" y="116" text-anchor="middle">your chosen look</text>
+      <rect class="hl" x="610" y="18" width="200" height="62" rx="10"/>
+      <text x="710" y="45" text-anchor="middle">Color matrix</text>
+      <text class="sub" x="710" y="64" text-anchor="middle">Magnification API</text>
+      <rect class="hl" x="610" y="122" width="200" height="62" rx="10"/>
+      <text x="710" y="149" text-anchor="middle">Black-level curve</text>
+      <text class="sub" x="710" y="168" text-anchor="middle">display gamma ramp</text>
+      <path class="arrow" d="M160,101 H206"/>
+      <path class="arrow" d="M360,101 H406"/>
+      <path class="arrow" d="M560,95 C585,95 585,49 606,49"/>
+      <path class="arrow" d="M560,107 C585,107 585,153 606,153"/>
+    </svg>
+  </div>
+
+  <div class="two" style="margin-top:14px">
+    <div class="card">
+      <h3>Color matrix</h3>
+      <p>Windows' Magnification API can apply a 5×5 color matrix to everything on screen. Display Tuner builds one matrix from your settings: saturation (mixing each channel with its luminance), contrast around mid-grey, a brightness offset, and warmth as per-channel gains that only ever reduce a channel, so nothing clips.</p>
+    </div>
+    <div class="card curve">
+      <h3>Black-level curve</h3>
+      <svg viewBox="0 0 260 170" role="img" aria-label="Output against input: the curve dips below the straight line only near black">
+        <line class="axis" x1="30" y1="150" x2="250" y2="150"/><line class="axis" x1="30" y1="150" x2="30" y2="10"/>
+        <path class="ref" d="M30,150 L250,10"/>
+        <path class="line" d="M30,150 C45,149 60,145 78,120 L250,10"/>
+        <text x="140" y="166" text-anchor="middle">input brightness</text>
+        <text x="16" y="80" text-anchor="middle" transform="rotate(-90 16 80)">output</text>
+        <text x="96" y="140">near-black deepened</text>
+      </svg>
+      <p>Only the darkest ~20% of tones are pulled down, through the display's gamma ramp. Mid-tones and highlights are untouched, so dark scenes get deeper without the whole picture turning dim.</p>
+    </div>
+  </div>
+
+  <h2>Auto-tuning</h2>
+  <p>The panel's red, green and blue primaries form a triangle on the CIE color chart. Its area compared with sRGB says how much color the screen can show, and the presets adapt:</p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Panel type</th><th>Color area vs sRGB</th><th>Extra color (OLED Movie)</th><th>Black level</th></tr></thead>
+      <tbody>
+        <tr><td>Narrow-gamut IPS/TN (typical budget laptop, “45% NTSC”)</td><td class="num">under 75%</td><td class="num">+15%</td><td class="num">35%</td></tr>
+        <tr><td>Mid-gamut</td><td class="num">75–95%</td><td class="num">+8%</td><td class="num">35%</td></tr>
+        <tr><td>sRGB panel</td><td class="num">95–120%</td><td class="num">+4%</td><td class="num">35%</td></tr>
+        <tr><td>Wide-gamut (DCI-P3 and up)</td><td class="num">over 120%</td><td class="num">0%</td><td class="num">35%</td></tr>
+        <tr><td>OLED</td><td class="num">any</td><td class="num">by gamut</td><td class="num">off (already true black)</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2>Presets</h2>
+  <div class="grid">
+    <div class="card"><h3>OLED Movie</h3><p>Richer color and deeper near-blacks with a touch more contrast. The everyday pick for films and series.</p></div>
+    <div class="card"><h3>True Black</h3><p>The strongest near-black deepening with a little more contrast, for the closest thing to OLED black on an LCD.</p></div>
+    <div class="card"><h3>AMOLED Punch</h3><p>True-black depth plus extra color, like a phone's AMOLED screen.</p></div>
+    <div class="card"><h3>Dark Room</h3><p>Deep blacks, slightly dimmer and a touch warm, for watching with the lights off.</p></div>
+    <div class="card"><h3>Anime</h3><p>Bright, saturated color with clean lines and light black deepening.</p></div>
+    <div class="card"><h3>Sports</h3><p>Crisp contrast and vivid greens with a cool, daylight tone.</p></div>
+    <div class="card"><h3>Gaming</h3><p>A bit more color and contrast without crushing shadow detail.</p></div>
+    <div class="card"><h3>Noir</h3><p>Black and white with deep blacks, for classic films.</p></div>
+    <div class="card"><h3>Reading</h3><p>Softer color and a warm white for long reading sessions.</p></div>
+    <div class="card"><h3>OLED Vivid</h3><p>Extra color pop and a slightly cool tone, for animation, nature and HDR-style trailers.</p></div>
+    <div class="card"><h3>Cinema</h3><p>Gentler color with a warm, film-like white.</p></div>
+    <div class="card"><h3>Deep Black</h3><p>The strongest black level, for dark scenes and night-time films.</p></div>
+    <div class="card"><h3>Night</h3><p>Warm and a little dimmer, easier on the eyes late at night.</p></div>
+    <div class="card"><h3>Natural</h3><p>No change: your screen exactly as it was.</p></div>
+  </div>
+
+  <h2>Use it</h2>
+  <div class="card">
+    <p style="color:var(--text)">1. Download <code>DisplayTuner.exe</code> and put it in any folder. 2. Run it and pick a preset. 3. Adjust the sliders if you like, then <b>Save as default</b>. 4. Turn on <b>Start with Windows</b> to have it every time.</p>
+  </div>
+  <p class="note" style="margin-top:12px">Windows SmartScreen may warn about an unknown publisher because the app isn't code-signed. Choose <b>More info → Run anyway</b>, or build it yourself.</p>
+
+  <h2>Build it yourself</h2>
+  <p>It uses the C# compiler that's already part of Windows, so there's nothing to install:</p>
+<pre><code>git clone https://github.com/KevinLeve/DisplayTuner
+cd DisplayTuner
+powershell -ExecutionPolicy Bypass -File build.ps1</code></pre>
+
+  <h2>Good to know</h2>
+  <div class="grid">
+    <div class="card"><h3>Screenshots look normal</h3><p>The filter changes what the screen shows, not the image itself, so captures and recordings keep the original colors.</p></div>
+    <div class="card"><h3>Protected video and games</h3><p>Some DRM-protected players and exclusive-fullscreen games may bypass the filter.</p></div>
+    <div class="card"><h3>Several monitors</h3><p>The filter applies to every screen; presets are tuned for the main one.</p></div>
+  </div>
+
+  <footer>KevinB's Display Tuner • MIT License</footer>
+</main>
+</body>
+</html>
