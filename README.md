@@ -18,7 +18,7 @@ Grab `DisplayTuner.exe` from the [Releases](../../releases) page and run it. Win
 
 ## See the difference
 
-Left half untouched, right half with a preset (simulated with the app's exact color math, since screenshots can't capture the live filter).
+Left half untouched, right half with a preset (simulated with the app's exact color math, since screenshots can't capture the live filter). For a **drag-to-compare slider** with every preset, see the [project page](https://kevinleve.github.io/DisplayTuner/#see-the-difference).
 
 **True Black**: deeper shadows, the fire keeps its glow.
 ![Peaky Blinders: Natural vs True Black](docs/compare-peaky.jpg)

@@ -4,7 +4,8 @@
 param(
     [Parameter(Mandatory)][string]$Source, [Parameter(Mandatory)][string]$Out, [Parameter(Mandatory)][string]$Label,
     [int]$Brightness = 0, [int]$Contrast = 100, [int]$Saturation = 100, [int]$BlackLevel = 0, [int]$Warmth = 0,
-    [int]$Width = 1280, [string]$Credit = ''
+    [int]$Width = 1280, [string]$Credit = '',
+    [switch]$Full   # apply the preset to the whole frame, no divider or labels (for the webpage's drag slider)
 )
 Add-Type -ReferencedAssemblies System.Drawing -TypeDefinition @'
 using System; using System.Drawing; using System.Drawing.Imaging; using System.Runtime.InteropServices;
@@ -42,9 +43,12 @@ $h = [int]($src.Height * $Width / $src.Width)
 $b = New-Object System.Drawing.Bitmap $Width, $h, ([System.Drawing.Imaging.PixelFormat]::Format32bppArgb)
 $g = [System.Drawing.Graphics]::FromImage($b); $g.InterpolationMode = 'HighQualityBicubic'; $g.DrawImage($src, 0, 0, $Width, $h); $src.Dispose()
 $half = [int]($Width / 2)
-[Sim]::Apply($b, $half, $Brightness, $Contrast, $Saturation, $BlackLevel, $Warmth)
-# divider and labels
+$noChange = $Brightness -eq 0 -and $Contrast -eq 100 -and $Saturation -eq 100 -and $BlackLevel -eq 0 -and $Warmth -eq 0
+if (-not $noChange) { [Sim]::Apply($b, $(if ($Full) { 0 } else { $half }), $Brightness, $Contrast, $Saturation, $BlackLevel, $Warmth) }
 $g.SmoothingMode = 'AntiAlias'; $g.TextRenderingHint = 'AntiAlias'
+if ($Full) { $Label = $null }
+# divider and labels (split mode only)
+if ($Label) {
 $g.FillRectangle((New-Object System.Drawing.SolidBrush ([System.Drawing.Color]::FromArgb(230, 255, 255, 255))), $half - 1, 0, 2, $h)
 $font = New-Object System.Drawing.Font 'Segoe UI Semibold', 15
 function Tag($text, $x, $right) {
@@ -56,6 +60,7 @@ function Tag($text, $x, $right) {
 }
 Tag 'Natural' 0 $false
 Tag $Label $Width $true
+}
 if ($Credit) {
     $cf = New-Object System.Drawing.Font 'Segoe UI', 10
     $cs = $g.MeasureString($Credit, $cf)

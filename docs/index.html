@@ -33,6 +33,20 @@
   .note { font-size: 14px; color: var(--sub); }
   .shot { margin: 32px 0 0; text-align: center; }
   .shot img { max-width: 100%; width: 420px; border-radius: 10px; border: 1px solid var(--stroke); }
+  .cmp-controls { display: flex; flex-wrap: wrap; gap: 10px 18px; margin: 18px 0 14px; }
+  .seg { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { font: inherit; font-size: 14px; padding: 6px 14px; border-radius: 999px; border: 1px solid var(--stroke); background: var(--card); color: var(--text); cursor: pointer; }
+  .chip.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+  @media (prefers-color-scheme: dark) { .chip.on { color: #111; } }
+  .cmp { position: relative; overflow: hidden; border-radius: 12px; border: 1px solid var(--stroke); cursor: ew-resize; touch-action: pan-y; user-select: none; -webkit-user-select: none; }
+  .cmp img { display: block; width: 100%; height: auto; pointer-events: none; }
+  .cmp #cmp-after { position: absolute; inset: 0; height: 100%; object-fit: cover; }
+  .cmp-line { position: absolute; top: 0; bottom: 0; width: 2px; margin-left: -1px; background: #fff; box-shadow: 0 0 6px rgba(0,0,0,.5); pointer-events: none; }
+  .cmp-knob { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 38px; height: 38px; border-radius: 50%; background: #fff; color: #222; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; letter-spacing: -1px; box-shadow: 0 2px 8px rgba(0,0,0,.4); }
+  .cmp-tag { position: absolute; top: 12px; padding: 4px 12px; border-radius: 999px; background: rgba(0,0,0,.6); color: #fff; font-size: 13px; font-weight: 600; pointer-events: none; }
+  .cmp-tag.left { left: 12px; } .cmp-tag.right { right: 12px; }
+  .cmp input[type=range] { position: absolute; left: 0; right: 0; bottom: 0; width: 100%; margin: 0; opacity: 0; height: 24px; cursor: ew-resize; }
+  .cmp input[type=range]:focus-visible { opacity: 1; }
   .compare { margin: 0 0 22px; }
   .compare img { width: 100%; height: auto; display: block; border-radius: 12px; border: 1px solid var(--stroke); }
   .compare figcaption { font-size: 15px; color: var(--sub); margin-top: 8px; }
@@ -84,16 +98,72 @@
   <p class="note">Portable single file • Windows 10 / 11, 64-bit • free and open source (MIT)</p>
   <div class="shot"><img src="screenshot.png" alt="KevinB's Display Tuner window with presets and sliders"></div>
 
-  <h2>See the difference</h2>
-  <p>Left half untouched, right half with a preset. Screenshots can't capture the live filter, so these are made with the app's exact color math, tuned for a typical narrow-gamut laptop panel.</p>
+  <h2 id="see-the-difference">See the difference</h2>
+  <p>Drag the slider to compare the original picture (left) with Display Tuner (right). Pick a scene and a preset. Screenshots can't capture the live filter, so these are made with the app's exact color math, tuned for a typical narrow-gamut laptop panel.</p>
+  <div class="cmp-controls">
+    <div class="seg" role="group" aria-label="Scene">
+      <button type="button" class="chip on" data-scene="peaky">Peaky Blinders</button>
+      <button type="button" class="chip" data-scene="f1">F1 The Movie</button>
+    </div>
+    <div class="seg" role="group" aria-label="Preset">
+      <button type="button" class="chip" data-preset="oled-movie">OLED Movie</button>
+      <button type="button" class="chip on" data-preset="true-black">True Black</button>
+      <button type="button" class="chip" data-preset="amoled-punch">AMOLED Punch</button>
+      <button type="button" class="chip" data-preset="oled-vivid">OLED Vivid</button>
+      <button type="button" class="chip" data-preset="cinema">Cinema</button>
+    </div>
+  </div>
   <figure class="compare">
-    <img src="compare-peaky.jpg" alt="Peaky Blinders scene: natural on the left, True Black preset on the right with deeper shadows and richer fire">
-    <figcaption><b>True Black</b>: the dark coat and shadows go deeper while the fire keeps its glow. <span class="note">Peaky Blinders S6E6 © BBC / Caryn Mandabach Productions.</span></figcaption>
+    <div class="cmp" id="cmp">
+      <img id="cmp-before" src="compare/peaky-original.jpg" alt="Original frame" draggable="false">
+      <img id="cmp-after" src="compare/peaky-true-black.jpg" alt="Same frame with the selected Display Tuner preset" draggable="false">
+      <div class="cmp-line" id="cmp-line"><span class="cmp-knob" aria-hidden="true">‹ ›</span></div>
+      <span class="cmp-tag left">Original</span>
+      <span class="cmp-tag right" id="cmp-label">True Black</span>
+      <input type="range" id="cmp-range" min="0" max="100" value="50" step="0.5" aria-label="Compare position">
+    </div>
+    <figcaption id="cmp-caption">Peaky Blinders S6E6 © BBC / Caryn Mandabach Productions.</figcaption>
   </figure>
-  <figure class="compare">
-    <img src="compare-f1.jpg" alt="F1 The Movie scene at Silverstone: natural on the left, AMOLED Punch preset on the right with richer color and contrast">
-    <figcaption><b>AMOLED Punch</b>: richer track colors and deeper contrast in daylight. <span class="note">F1 The Movie (2025) © Apple / Warner Bros.</span></figcaption>
-  </figure>
+  <script>
+  (function () {
+    var credits = { peaky: "Peaky Blinders S6E6 © BBC / Caryn Mandabach Productions.", f1: "F1 The Movie (2025) © Apple / Warner Bros." };
+    var state = { scene: "peaky", preset: "true-black" };
+    var box = document.getElementById("cmp"), before = document.getElementById("cmp-before"), after = document.getElementById("cmp-after");
+    var line = document.getElementById("cmp-line"), range = document.getElementById("cmp-range");
+    function setPos(p) {
+      p = Math.max(0, Math.min(100, p));
+      after.style.clipPath = "inset(0 0 0 " + p + "%)";
+      line.style.left = p + "%";
+      range.value = p;
+    }
+    function load() {
+      before.src = "compare/" + state.scene + "-original.jpg";
+      after.src = "compare/" + state.scene + "-" + state.preset + ".jpg";
+      document.getElementById("cmp-caption").textContent = credits[state.scene];
+    }
+    // preload every image so switching is instant
+    ["peaky", "f1"].forEach(function (s) {
+      ["original", "oled-movie", "true-black", "amoled-punch", "oled-vivid", "cinema"].forEach(function (p) { new Image().src = "compare/" + s + "-" + p + ".jpg"; });
+    });
+    document.querySelectorAll(".cmp-controls .chip").forEach(function (b) {
+      b.addEventListener("click", function () {
+        var group = b.dataset.scene ? "scene" : "preset";
+        document.querySelectorAll("[data-" + group + "]").forEach(function (x) { x.classList.toggle("on", x === b); });
+        state[group] = b.dataset[group];
+        if (group === "preset") document.getElementById("cmp-label").textContent = b.textContent;
+        load();
+      });
+    });
+    var dragging = false;
+    function fromEvent(e) { var r = box.getBoundingClientRect(); setPos((e.clientX - r.left) / r.width * 100); }
+    box.addEventListener("pointerdown", function (e) { dragging = true; box.setPointerCapture(e.pointerId); fromEvent(e); });
+    box.addEventListener("pointermove", function (e) { if (dragging) fromEvent(e); });
+    box.addEventListener("pointerup", function () { dragging = false; });
+    box.addEventListener("pointercancel", function () { dragging = false; });
+    range.addEventListener("input", function () { setPos(parseFloat(range.value)); });
+    setPos(50);
+  })();
+  </script>
 
   <h2>What it does</h2>
   <div class="grid">
