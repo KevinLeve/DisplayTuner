@@ -33,6 +33,10 @@
   .note { font-size: 14px; color: var(--sub); }
   .shot { margin: 32px 0 0; text-align: center; }
   .shot img { max-width: 100%; width: 420px; border-radius: 10px; border: 1px solid var(--stroke); }
+  .compare { margin: 0 0 22px; }
+  .compare img { width: 100%; height: auto; display: block; border-radius: 12px; border: 1px solid var(--stroke); }
+  .compare figcaption { font-size: 15px; color: var(--sub); margin-top: 8px; }
+  .compare figcaption b { color: var(--text); }
   .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 14px; }
   .card { background: var(--card); border: 1px solid var(--stroke); border-radius: 12px; padding: 18px 20px; box-shadow: var(--shadow); }
   .card p { color: var(--sub); margin: 0; font-size: 15px; }
@@ -79,6 +83,17 @@
   </div>
   <p class="note">Portable single file • Windows 10 / 11, 64-bit • free and open source (MIT)</p>
   <div class="shot"><img src="screenshot.png" alt="KevinB's Display Tuner window with presets and sliders"></div>
+
+  <h2>See the difference</h2>
+  <p>Left half untouched, right half with a preset. Screenshots can't capture the live filter, so these are made with the app's exact color math, tuned for a typical narrow-gamut laptop panel.</p>
+  <figure class="compare">
+    <img src="compare-peaky.jpg" alt="Peaky Blinders scene: natural on the left, True Black preset on the right with deeper shadows and richer fire">
+    <figcaption><b>True Black</b>: the dark coat and shadows go deeper while the fire keeps its glow. <span class="note">Peaky Blinders S6E6 © BBC / Caryn Mandabach Productions.</span></figcaption>
+  </figure>
+  <figure class="compare">
+    <img src="compare-f1.jpg" alt="F1 The Movie scene at Silverstone: natural on the left, AMOLED Punch preset on the right with richer color and contrast">
+    <figcaption><b>AMOLED Punch</b>: richer track colors and deeper contrast in daylight. <span class="note">F1 The Movie (2025) © Apple / Warner Bros.</span></figcaption>
+  </figure>
 
   <h2>What it does</h2>
   <div class="grid">

@@ -16,6 +16,18 @@ Grab `DisplayTuner.exe` from the [Releases](../../releases) page and run it. Win
 
 > Windows SmartScreen may warn about an unknown publisher because the app isn't code-signed. Click **More info → Run anyway**, or build it yourself from source (below).
 
+## See the difference
+
+Left half untouched, right half with a preset (simulated with the app's exact color math, since screenshots can't capture the live filter).
+
+**True Black**: deeper shadows, the fire keeps its glow.
+![Peaky Blinders: Natural vs True Black](docs/compare-peaky.jpg)
+<sub>Peaky Blinders S6E6 © BBC / Caryn Mandabach Productions</sub>
+
+**AMOLED Punch**: richer color and contrast in daylight.
+![F1 The Movie: Natural vs AMOLED Punch](docs/compare-f1.jpg)
+<sub>F1 The Movie (2025) © Apple / Warner Bros.</sub>
+
 ## How it works
 
 | Part | Technique |
