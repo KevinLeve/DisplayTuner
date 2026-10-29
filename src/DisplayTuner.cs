@@ -361,7 +361,10 @@ class MainForm : Form
         Text = AppName; Icon = Icon.ExtractAssociatedIcon(Application.ExecutablePath);
         FormBorderStyle = FormBorderStyle.Sizable; MaximizeBox = true; AutoScaleDimensions = new SizeF(96f, 96f); AutoScaleMode = AutoScaleMode.Dpi;
         BackColor = Theme.Bg; ForeColor = Theme.Text; Font = Theme.Body; DoubleBuffered = true;
-        content = new System.Windows.Forms.Panel { Dock = DockStyle.Fill, AutoScroll = true, BackColor = Theme.Bg };
+        content = new System.Windows.Forms.Panel { Dock = DockStyle.Fill, BackColor = Theme.Bg };
+        // vertical scrolling only: the cards always fit the width
+        content.HorizontalScroll.Maximum = 0; content.HorizontalScroll.Visible = false; content.HorizontalScroll.Enabled = false;
+        content.AutoScroll = true;
         Controls.Add(content);
         ClientSize = new Size(480, 682); StartPosition = FormStartPosition.CenterScreen;
 

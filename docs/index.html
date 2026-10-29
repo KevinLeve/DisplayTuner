@@ -4,273 +4,421 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>KevinB's Display Tuner</title>
-<meta name="description" content="A tiny portable Windows app that gives an ordinary laptop screen an OLED-style picture for movies, auto-tuned to your panel.">
+<meta name="description" content="Give your ordinary LCD or IPS laptop screen an edge: OLED and AMOLED-style tuning effects, auto-tuned to your display. Free, portable, open source.">
+<meta property="og:title" content="KevinB's Display Tuner">
+<meta property="og:description" content="OLED and AMOLED-style tuning effects for ordinary laptop screens, auto-tuned to your display.">
+<meta property="og:image" content="compare-peaky.jpg">
 <link rel="icon" href="icon.png">
 <style>
   :root {
-    --bg: #f6f6f7; --card: #ffffff; --stroke: #e3e3e6; --text: #1b1b1f; --sub: #5d5d66;
-    --accent: #0067c0; --accent-soft: #e5f1fb; --code: #f0f0f3; --shadow: 0 1px 2px rgba(0,0,0,.05);
+    --bg: #f7f7f8; --bg2: #ffffff; --card: #ffffff; --stroke: rgba(0,0,0,.08); --stroke2: rgba(0,0,0,.14);
+    --text: #121214; --sub: #5b5b63; --muted: #8a8a93;
+    --accent: #0a6cff; --accent2: #7b5cff; --on-accent: #fff;
+    --glow1: rgba(10,108,255,.16); --glow2: rgba(123,92,255,.14);
+    --nav: rgba(247,247,248,.72); --shadow: 0 1px 2px rgba(0,0,0,.04), 0 8px 24px rgba(0,0,0,.06);
+    --radius: 16px;
   }
   @media (prefers-color-scheme: dark) {
-    :root { --bg: #1c1c1e; --card: #2a2a2c; --stroke: #3a3a3d; --text: #f2f2f2; --sub: #a3a3aa;
-      --accent: #60cdff; --accent-soft: #1f3442; --code: #232325; --shadow: none; }
+    :root {
+      --bg: #0b0b0d; --bg2: #121216; --card: #141418; --stroke: rgba(255,255,255,.08); --stroke2: rgba(255,255,255,.16);
+      --text: #f4f4f6; --sub: #a4a4ad; --muted: #75757e;
+      --accent: #5cc8ff; --accent2: #a48bff; --on-accent: #06121c;
+      --glow1: rgba(92,200,255,.16); --glow2: rgba(164,139,255,.14);
+      --nav: rgba(11,11,13,.68); --shadow: 0 1px 2px rgba(0,0,0,.4), 0 12px 40px rgba(0,0,0,.45);
+    }
   }
   * { box-sizing: border-box; }
-  html { -webkit-text-size-adjust: 100%; }
-  body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.65 "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif; }
-  main { max-width: 860px; margin: 0 auto; padding: 48px 16px 72px; }
-  h1 { font: 700 40px/1.15 "Segoe UI Variable Display", "Segoe UI", system-ui, sans-serif; margin: 0 0 12px; letter-spacing: -.01em; }
-  h2 { font-size: 24px; margin: 56px 0 12px; }
-  h3 { font-size: 17px; margin: 0 0 6px; }
-  p { margin: 0 0 14px; }
-  .lead { font-size: 19px; color: var(--sub); max-width: 640px; }
-  .hero { display: flex; gap: 20px; align-items: center; margin-bottom: 20px; }
-  .hero img { width: 72px; height: 72px; flex: none; }
-  .buttons { display: flex; gap: 12px; flex-wrap: wrap; margin: 24px 0 8px; }
-  .btn { display: inline-block; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 600; border: 1px solid var(--stroke); color: var(--text); background: var(--card); }
-  .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
-  @media (prefers-color-scheme: dark) { .btn.primary { color: #111; } }
-  .note { font-size: 14px; color: var(--sub); }
-  .shot { margin: 32px 0 0; text-align: center; }
-  .shot img { max-width: 100%; width: 420px; border-radius: 10px; border: 1px solid var(--stroke); }
-  .cmp-controls { display: flex; flex-wrap: wrap; gap: 10px 18px; margin: 18px 0 14px; }
-  .seg { display: flex; flex-wrap: wrap; gap: 8px; }
-  .chip { font: inherit; font-size: 14px; padding: 6px 14px; border-radius: 999px; border: 1px solid var(--stroke); background: var(--card); color: var(--text); cursor: pointer; }
-  .chip.on { background: var(--accent); border-color: var(--accent); color: #fff; }
-  @media (prefers-color-scheme: dark) { .chip.on { color: #111; } }
-  .cmp { position: relative; overflow: hidden; border-radius: 12px; border: 1px solid var(--stroke); cursor: ew-resize; touch-action: pan-y; user-select: none; -webkit-user-select: none; }
+  html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.6 "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, sans-serif; -webkit-font-smoothing: antialiased; }
+  a { color: inherit; }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 20px; }
+  .display { font-family: "Segoe UI Variable Display", "Segoe UI", system-ui, -apple-system, sans-serif; letter-spacing: -.02em; }
+
+  /* nav */
+  nav { position: sticky; top: 0; z-index: 20; background: var(--nav); backdrop-filter: saturate(160%) blur(16px); -webkit-backdrop-filter: saturate(160%) blur(16px); border-bottom: 1px solid var(--stroke); }
+  nav .wrap { display: flex; align-items: center; gap: 24px; height: 60px; }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 600; text-decoration: none; white-space: nowrap; }
+  .brand img { width: 26px; height: 26px; }
+  .links { display: flex; gap: 22px; margin-left: auto; font-size: 14px; }
+  .links a { text-decoration: none; color: var(--sub); }
+  .links a:hover { color: var(--text); }
+  .nav-cta { font-size: 14px; }
+  @media (max-width: 760px) { .links { display: none; } .nav-cta { margin-left: auto; } }
+
+  /* buttons */
+  .btn { display: inline-flex; align-items: center; gap: 8px; padding: 11px 20px; border-radius: 999px; font-weight: 600; font-size: 15px; text-decoration: none; border: 1px solid var(--stroke2); color: var(--text); background: var(--card); transition: transform .15s ease, box-shadow .15s ease; }
+  .btn:hover { transform: translateY(-1px); box-shadow: var(--shadow); }
+  .btn.primary { background: var(--accent); border-color: transparent; color: var(--on-accent); }
+  .btn.small { padding: 7px 14px; font-size: 14px; }
+  .btn svg { width: 18px; height: 18px; }
+
+  /* hero */
+  .hero { position: relative; overflow: hidden; padding: 84px 0 40px; text-align: center; }
+  .hero::before { content: ""; position: absolute; inset: -20% -10% auto; height: 620px; background: radial-gradient(40% 50% at 35% 40%, var(--glow1), transparent 70%), radial-gradient(35% 45% at 65% 35%, var(--glow2), transparent 70%); pointer-events: none; }
+  .hero > .wrap { position: relative; }
+  .pill { display: inline-flex; align-items: center; gap: 8px; padding: 5px 12px 5px 6px; border-radius: 999px; border: 1px solid var(--stroke2); background: var(--card); font-size: 13px; color: var(--sub); }
+  .pill b { background: var(--accent); color: var(--on-accent); padding: 2px 8px; border-radius: 999px; font-size: 12px; font-weight: 600; }
+  h1 { font-size: clamp(38px, 6.2vw, 68px); line-height: 1.04; margin: 22px auto 18px; max-width: 900px; font-weight: 700; }
+  .grad { background: linear-gradient(90deg, var(--accent), var(--accent2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .lead { font-size: clamp(17px, 2vw, 20px); color: var(--sub); max-width: 680px; margin: 0 auto 30px; }
+  .ctas { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .meta { margin-top: 16px; font-size: 13px; color: var(--muted); }
+  .meta span + span::before { content: "•"; margin: 0 8px; }
+
+  /* app window showcase */
+  .showcase { position: relative; margin: 56px auto 0; max-width: 980px; display: grid; grid-template-columns: 1.55fr 1fr; gap: 20px; align-items: center; text-align: left; }
+  .showcase .frame { border-radius: 14px; overflow: hidden; border: 1px solid var(--stroke2); box-shadow: var(--shadow); background: #000; }
+  .showcase .frame img { display: block; width: 100%; height: auto; }
+  .showcase .app { justify-self: center; width: 100%; max-width: 340px; border-radius: 12px; box-shadow: var(--shadow); border: 1px solid var(--stroke2); }
+  @media (max-width: 820px) { .showcase { grid-template-columns: 1fr; } .showcase .app { max-width: 300px; } }
+
+  /* sections */
+  section { padding: 88px 0; }
+  .eyebrow { font-size: 13px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+  h2 { font-size: clamp(28px, 4vw, 42px); line-height: 1.12; margin: 10px 0 14px; font-weight: 700; }
+  .sec-lead { color: var(--sub); font-size: 18px; max-width: 640px; margin: 0 0 36px; }
+  .center { text-align: center; } .center .sec-lead { margin-left: auto; margin-right: auto; }
+  .alt { background: var(--bg2); border-top: 1px solid var(--stroke); border-bottom: 1px solid var(--stroke); }
+
+  /* compare */
+  .cmp-controls { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+  .seg { display: inline-flex; flex-wrap: wrap; gap: 4px; padding: 4px; border-radius: 999px; background: var(--card); border: 1px solid var(--stroke); }
+  .chip { font: inherit; font-size: 14px; padding: 7px 14px; border-radius: 999px; border: 0; background: transparent; color: var(--sub); cursor: pointer; }
+  .chip:hover { color: var(--text); }
+  .chip.on { background: var(--accent); color: var(--on-accent); font-weight: 600; }
+  .cmp { position: relative; overflow: hidden; border-radius: var(--radius); border: 1px solid var(--stroke2); cursor: ew-resize; touch-action: pan-y; user-select: none; -webkit-user-select: none; box-shadow: var(--shadow); background: #000; }
   .cmp img { display: block; width: 100%; height: auto; pointer-events: none; }
   .cmp #cmp-after { position: absolute; inset: 0; height: 100%; object-fit: cover; }
-  .cmp-line { position: absolute; top: 0; bottom: 0; width: 2px; margin-left: -1px; background: #fff; box-shadow: 0 0 6px rgba(0,0,0,.5); pointer-events: none; }
-  .cmp-knob { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 38px; height: 38px; border-radius: 50%; background: #fff; color: #222; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; letter-spacing: -1px; box-shadow: 0 2px 8px rgba(0,0,0,.4); }
-  .cmp-tag { position: absolute; top: 12px; padding: 4px 12px; border-radius: 999px; background: rgba(0,0,0,.6); color: #fff; font-size: 13px; font-weight: 600; pointer-events: none; }
-  .cmp-tag.left { left: 12px; } .cmp-tag.right { right: 12px; }
-  .cmp input[type=range] { position: absolute; left: 0; right: 0; bottom: 0; width: 100%; margin: 0; opacity: 0; height: 24px; cursor: ew-resize; }
+  .cmp-line { position: absolute; top: 0; bottom: 0; width: 2px; margin-left: -1px; background: #fff; box-shadow: 0 0 10px rgba(0,0,0,.55); pointer-events: none; }
+  .cmp-knob { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 44px; height: 44px; border-radius: 50%; background: rgba(255,255,255,.92); backdrop-filter: blur(6px); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 14px rgba(0,0,0,.45); }
+  .cmp-knob svg { width: 22px; height: 22px; color: #111; }
+  .cmp-tag { position: absolute; top: 14px; padding: 5px 12px; border-radius: 999px; background: rgba(0,0,0,.55); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); color: #fff; font-size: 13px; font-weight: 600; pointer-events: none; }
+  .cmp-tag.left { left: 14px; } .cmp-tag.right { right: 14px; }
+  .cmp input[type=range] { position: absolute; left: 0; right: 0; bottom: 0; width: 100%; margin: 0; opacity: 0; height: 26px; cursor: ew-resize; }
   .cmp input[type=range]:focus-visible { opacity: 1; }
-  .compare { margin: 0 0 22px; }
-  .compare img { width: 100%; height: auto; display: block; border-radius: 12px; border: 1px solid var(--stroke); }
-  .compare figcaption { font-size: 15px; color: var(--sub); margin-top: 8px; }
-  .compare figcaption b { color: var(--text); }
-  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 14px; }
-  .card { background: var(--card); border: 1px solid var(--stroke); border-radius: 12px; padding: 18px 20px; box-shadow: var(--shadow); }
-  .card p { color: var(--sub); margin: 0; font-size: 15px; }
-  .table-wrap { overflow-x: auto; border: 1px solid var(--stroke); border-radius: 12px; background: var(--card); }
-  table { width: 100%; border-collapse: collapse; font-size: 15px; min-width: 520px; }
-  th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--stroke); }
-  th { font-weight: 600; color: var(--sub); font-size: 13px; text-transform: none; }
-  tr:last-child td { border-bottom: none; }
+  .credit { font-size: 13px; color: var(--muted); margin-top: 10px; }
+
+  /* features */
+  .features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  @media (max-width: 900px) { .features { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 560px) { .features { grid-template-columns: 1fr; } }
+  .feature { background: var(--card); border: 1px solid var(--stroke); border-radius: var(--radius); padding: 24px; transition: border-color .2s ease, transform .2s ease; }
+  .feature:hover { border-color: var(--stroke2); transform: translateY(-2px); }
+  .ico { width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center; background: linear-gradient(135deg, var(--glow1), var(--glow2)); color: var(--accent); margin-bottom: 14px; }
+  .ico svg { width: 22px; height: 22px; }
+  .feature h3 { margin: 0 0 6px; font-size: 17px; }
+  .feature p { margin: 0; color: var(--sub); font-size: 15px; }
+  kbd { font: 600 12px/1 "Segoe UI", system-ui, sans-serif; padding: 3px 7px; border-radius: 6px; border: 1px solid var(--stroke2); border-bottom-width: 2px; background: var(--bg); color: var(--text); }
+
+  /* presets */
+  .presets { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+  .preset { border-radius: 14px; padding: 16px 18px; background: var(--card); border: 1px solid var(--stroke); }
+  .preset .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 8px; vertical-align: 1px; }
+  .preset b { font-size: 15px; }
+  .preset p { margin: 4px 0 0; font-size: 14px; color: var(--sub); }
+
+  /* how it works */
+  .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; counter-reset: s; }
+  @media (max-width: 820px) { .steps { grid-template-columns: 1fr; } }
+  .step { position: relative; background: var(--card); border: 1px solid var(--stroke); border-radius: var(--radius); padding: 24px 24px 22px; }
+  .step::before { counter-increment: s; content: "0" counter(s); font: 700 13px/1 "Segoe UI", system-ui, sans-serif; color: var(--accent); letter-spacing: .06em; }
+  .step h3 { margin: 10px 0 6px; font-size: 17px; }
+  .step p { margin: 0; color: var(--sub); font-size: 15px; }
+  .step code { font-size: 13px; }
+  .table-wrap { margin-top: 28px; overflow-x: auto; border: 1px solid var(--stroke); border-radius: var(--radius); background: var(--card); }
+  table { width: 100%; border-collapse: collapse; font-size: 15px; min-width: 560px; }
+  th, td { text-align: left; padding: 12px 16px; border-bottom: 1px solid var(--stroke); }
+  th { font-size: 12px; color: var(--muted); font-weight: 600; letter-spacing: .04em; text-transform: uppercase; }
+  tr:last-child td { border-bottom: 0; }
   td.num { font-variant-numeric: tabular-nums; }
-  code { font-family: "Cascadia Code", Consolas, monospace; font-size: 14px; background: var(--code); padding: 2px 6px; border-radius: 5px; }
-  pre { background: var(--code); border: 1px solid var(--stroke); border-radius: 10px; padding: 14px 16px; overflow-x: auto; }
-  pre code { background: none; padding: 0; }
-  .diagram { background: var(--card); border: 1px solid var(--stroke); border-radius: 12px; padding: 16px; }
-  .diagram svg { width: 100%; height: auto; display: block; }
-  .diagram text { font: 13px "Segoe UI", system-ui, sans-serif; fill: var(--text); }
-  .diagram .sub { fill: var(--sub); font-size: 11.5px; }
-  .diagram .box { fill: var(--bg); stroke: var(--stroke); }
-  .diagram .hl { fill: var(--accent-soft); stroke: var(--accent); }
-  .diagram .arrow { stroke: var(--sub); stroke-width: 1.5; fill: none; marker-end: url(#a); }
-  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; align-items: start; }
-  @media (max-width: 680px) { .two { grid-template-columns: 1fr; } h1 { font-size: 32px; } }
-  .curve svg { width: 100%; height: auto; }
-  .curve .axis { stroke: var(--stroke); }
-  .curve .ref { stroke: var(--sub); stroke-dasharray: 4 4; fill: none; }
-  .curve .line { stroke: var(--accent); stroke-width: 2.5; fill: none; }
-  .curve text { font: 11px "Segoe UI", system-ui, sans-serif; fill: var(--sub); }
-  .kbd { border: 1px solid var(--stroke); border-bottom-width: 2px; border-radius: 6px; padding: 1px 7px; font-size: 14px; background: var(--card); white-space: nowrap; }
-  footer { margin-top: 64px; color: var(--sub); font-size: 14px; }
-  a { color: var(--accent); }
+
+  /* specs + faq */
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
+  @media (max-width: 820px) { .two { grid-template-columns: 1fr; } }
+  .specs { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--stroke); }
+  .specs li { display: flex; justify-content: space-between; gap: 16px; padding: 13px 0; border-bottom: 1px solid var(--stroke); font-size: 15px; }
+  .specs li span:first-child { color: var(--sub); }
+  .specs li span:last-child { text-align: right; }
+  details { border-bottom: 1px solid var(--stroke); padding: 14px 0; }
+  details:first-of-type { border-top: 1px solid var(--stroke); }
+  summary { cursor: pointer; font-weight: 600; list-style: none; display: flex; justify-content: space-between; gap: 12px; }
+  summary::-webkit-details-marker { display: none; }
+  summary::after { content: "+"; color: var(--muted); font-weight: 400; font-size: 20px; line-height: 1; }
+  details[open] summary::after { content: "–"; }
+  details p { margin: 10px 0 2px; color: var(--sub); font-size: 15px; }
+  code { font-family: "Cascadia Code", Consolas, monospace; font-size: 14px; background: var(--bg); border: 1px solid var(--stroke); padding: 1px 6px; border-radius: 6px; }
+  pre { margin: 12px 0 0; background: var(--bg); border: 1px solid var(--stroke); border-radius: 12px; padding: 14px 16px; overflow-x: auto; font-size: 14px; }
+  pre code { border: 0; padding: 0; background: none; }
+
+  /* cta + footer */
+  .cta { text-align: center; padding: 72px 24px; border-radius: 24px; position: relative; overflow: hidden; background: var(--card); border: 1px solid var(--stroke); }
+  .cta::before { content: ""; position: absolute; inset: 0; background: radial-gradient(50% 80% at 30% 0%, var(--glow1), transparent 70%), radial-gradient(45% 80% at 75% 100%, var(--glow2), transparent 70%); pointer-events: none; }
+  .cta > * { position: relative; }
+  footer { padding: 40px 0 56px; color: var(--muted); font-size: 14px; }
+  footer .wrap { display: flex; flex-wrap: wrap; gap: 12px 24px; justify-content: space-between; }
+  footer a { color: var(--sub); text-decoration: none; }
+  footer a:hover { color: var(--text); }
+  /* grid children may shrink below their content (long code lines, tables) so the page never gets wider than a phone */
+  .two > *, .showcase > *, .features > *, .steps > *, .presets > * { min-width: 0; }
+  body { overflow-x: hidden; }
+  @media (max-width: 560px) {
+    section { padding: 64px 0; }
+    .hero { padding-top: 56px; }
+    .cmp-controls .seg { width: 100%; }
+    .chip { padding: 7px 12px; }
+  }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .btn, .feature { transition: none; } }
 </style>
 </head>
 <body>
-<main>
-  <div class="hero">
-    <img src="icon.png" alt="">
-    <div>
-      <h1>KevinB's Display Tuner</h1>
-      <p class="lead">Give your ordinary LCD or IPS laptop screen an edge: tuning effects that bring it closer to the look of an OLED or AMOLED display. Richer color, deeper blacks, tuned automatically for your panel.</p>
-    </div>
-  </div>
-  <div class="buttons">
-    <a class="btn primary" href="https://github.com/KevinLeve/DisplayTuner/releases/latest">Download for Windows</a>
-    <a class="btn" href="https://github.com/KevinLeve/DisplayTuner">Source code</a>
-  </div>
-  <p class="note">Portable single file • Windows 10 / 11, 64-bit • free and open source (MIT)</p>
-  <div class="shot"><img src="screenshot.png" alt="KevinB's Display Tuner window with presets and sliders"></div>
 
-  <h2 id="see-the-difference">See the difference</h2>
-  <p>Drag the slider to compare the original picture (left) with Display Tuner (right). Pick a scene and a preset. Screenshots can't capture the live filter, so these are made with the app's exact color math, tuned for a typical narrow-gamut laptop panel.</p>
-  <div class="cmp-controls">
-    <div class="seg" role="group" aria-label="Scene">
-      <button type="button" class="chip on" data-scene="peaky">Peaky Blinders</button>
-      <button type="button" class="chip" data-scene="f1">F1 The Movie</button>
+<nav>
+  <div class="wrap">
+    <a class="brand" href="#"><img src="icon.png" alt="">KevinB's Display Tuner</a>
+    <div class="links">
+      <a href="#compare">Compare</a>
+      <a href="#features">Features</a>
+      <a href="#presets">Presets</a>
+      <a href="#how">How it works</a>
+      <a href="#faq">FAQ</a>
     </div>
-    <div class="seg" role="group" aria-label="Preset">
-      <button type="button" class="chip" data-preset="oled-movie">OLED Movie</button>
-      <button type="button" class="chip on" data-preset="true-black">True Black</button>
-      <button type="button" class="chip" data-preset="amoled-punch">AMOLED Punch</button>
-      <button type="button" class="chip" data-preset="oled-vivid">OLED Vivid</button>
-      <button type="button" class="chip" data-preset="cinema">Cinema</button>
+    <a class="btn primary small nav-cta" href="https://github.com/KevinLeve/DisplayTuner/releases/latest">Download</a>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap">
+    <span class="pill"><b>v1.0</b> Free • portable • open source</span>
+    <h1 class="display">Give your laptop screen an <span class="grad">OLED edge</span>.</h1>
+    <p class="lead">Tuning effects that bring an ordinary LCD or IPS display closer to the look of OLED and AMOLED: richer color, deeper blacks, tuned automatically for your panel.</p>
+    <div class="ctas">
+      <a class="btn primary" href="https://github.com/KevinLeve/DisplayTuner/releases/latest">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11m0 0l-4-4m4 4l4-4M5 20h14"/></svg>
+        Download for Windows
+      </a>
+      <a class="btn" href="https://github.com/KevinLeve/DisplayTuner">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.61.07-.61 1 .07 1.53 1.03 1.53 1.03.9 1.52 2.34 1.08 2.91.83.09-.65.35-1.08.63-1.33-2.22-.25-4.55-1.11-4.55-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02a9.5 9.5 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.37.2 2.39.1 2.64.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85v2.75c0 .27.18.58.69.48A10 10 0 0 0 12 2z"/></svg>
+        View on GitHub
+      </a>
+    </div>
+    <p class="meta"><span>Windows 10 &amp; 11</span><span>64-bit</span><span>48 KB, no install</span><span>MIT license</span></p>
+
+    <div class="showcase">
+      <div class="frame"><img src="compare/peaky-true-black.jpg" alt="Film frame with the True Black preset applied"></div>
+      <img class="app" src="screenshot.png" alt="The Display Tuner window with presets, sliders and the on/off switch">
     </div>
   </div>
-  <figure class="compare">
+</header>
+
+<section id="compare" class="alt">
+  <div class="wrap">
+    <div class="center">
+      <div class="eyebrow">See the difference</div>
+      <h2 class="display">Drag to compare.</h2>
+      <p class="sec-lead">Original on the left, Display Tuner on the right. Pick a scene and a preset. Made with the app's exact color math, since screenshots can't capture the live filter.</p>
+    </div>
+    <div class="cmp-controls">
+      <div class="seg" role="group" aria-label="Scene">
+        <button type="button" class="chip on" data-scene="peaky">Peaky Blinders</button>
+        <button type="button" class="chip" data-scene="f1">F1 The Movie</button>
+      </div>
+      <div class="seg" role="group" aria-label="Preset">
+        <button type="button" class="chip" data-preset="oled-movie">OLED Movie</button>
+        <button type="button" class="chip on" data-preset="true-black">True Black</button>
+        <button type="button" class="chip" data-preset="amoled-punch">AMOLED Punch</button>
+        <button type="button" class="chip" data-preset="oled-vivid">OLED Vivid</button>
+        <button type="button" class="chip" data-preset="cinema">Cinema</button>
+      </div>
+    </div>
     <div class="cmp" id="cmp">
       <img id="cmp-before" src="compare/peaky-original.jpg" alt="Original frame" draggable="false">
       <img id="cmp-after" src="compare/peaky-true-black.jpg" alt="Same frame with the selected Display Tuner preset" draggable="false">
-      <div class="cmp-line" id="cmp-line"><span class="cmp-knob" aria-hidden="true">‹ ›</span></div>
+      <div class="cmp-line" id="cmp-line"><span class="cmp-knob" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l-6 6 6 6M15 6l6 6-6 6"/></svg></span></div>
       <span class="cmp-tag left">Original</span>
       <span class="cmp-tag right" id="cmp-label">True Black</span>
       <input type="range" id="cmp-range" min="0" max="100" value="50" step="0.5" aria-label="Compare position">
     </div>
-    <figcaption id="cmp-caption">Peaky Blinders S6E6 © BBC / Caryn Mandabach Productions.</figcaption>
-  </figure>
-  <script>
-  (function () {
-    var credits = { peaky: "Peaky Blinders S6E6 © BBC / Caryn Mandabach Productions.", f1: "F1 The Movie (2025) © Apple / Warner Bros." };
-    var state = { scene: "peaky", preset: "true-black" };
-    var box = document.getElementById("cmp"), before = document.getElementById("cmp-before"), after = document.getElementById("cmp-after");
-    var line = document.getElementById("cmp-line"), range = document.getElementById("cmp-range");
-    function setPos(p) {
-      p = Math.max(0, Math.min(100, p));
-      after.style.clipPath = "inset(0 0 0 " + p + "%)";
-      line.style.left = p + "%";
-      range.value = p;
-    }
-    function load() {
-      before.src = "compare/" + state.scene + "-original.jpg";
-      after.src = "compare/" + state.scene + "-" + state.preset + ".jpg";
-      document.getElementById("cmp-caption").textContent = credits[state.scene];
-    }
-    // preload every image so switching is instant
-    ["peaky", "f1"].forEach(function (s) {
-      ["original", "oled-movie", "true-black", "amoled-punch", "oled-vivid", "cinema"].forEach(function (p) { new Image().src = "compare/" + s + "-" + p + ".jpg"; });
-    });
-    document.querySelectorAll(".cmp-controls .chip").forEach(function (b) {
-      b.addEventListener("click", function () {
-        var group = b.dataset.scene ? "scene" : "preset";
-        document.querySelectorAll("[data-" + group + "]").forEach(function (x) { x.classList.toggle("on", x === b); });
-        state[group] = b.dataset[group];
-        if (group === "preset") document.getElementById("cmp-label").textContent = b.textContent;
-        load();
-      });
-    });
-    var dragging = false;
-    function fromEvent(e) { var r = box.getBoundingClientRect(); setPos((e.clientX - r.left) / r.width * 100); }
-    box.addEventListener("pointerdown", function (e) { dragging = true; box.setPointerCapture(e.pointerId); fromEvent(e); });
-    box.addEventListener("pointermove", function (e) { if (dragging) fromEvent(e); });
-    box.addEventListener("pointerup", function () { dragging = false; });
-    box.addEventListener("pointercancel", function () { dragging = false; });
-    range.addEventListener("input", function () { setPos(parseFloat(range.value)); });
-    setPos(50);
-  })();
-  </script>
-
-  <h2>What it does</h2>
-  <div class="grid">
-    <div class="card"><h3>Detects your screen</h3><p>Reads the data every display reports about itself (EDID): maker, model, and its red, green and blue primaries.</p></div>
-    <div class="card"><h3>Tunes the presets</h3><p>Washed-out, narrow-gamut panels get more color. Wide-gamut panels get little. OLED screens skip black deepening.</p></div>
-    <div class="card"><h3>Applies screen-wide</h3><p>Works in every app: browsers, video players, streaming sites. <span class="kbd">Ctrl</span> + <span class="kbd">Alt</span> + <span class="kbd">F</span> toggles it.</p></div>
-    <div class="card"><h3>Changes nothing permanently</h3><p>Exit the app and colors go straight back to normal. Settings live in a small file next to the exe.</p></div>
+    <p class="credit" id="cmp-caption">Peaky Blinders S6E6 © BBC / Caryn Mandabach Productions.</p>
   </div>
+</section>
 
-  <h2>How it works</h2>
-  <div class="diagram">
-    <svg viewBox="0 0 820 200" role="img" aria-label="Pipeline: EDID is read, presets are tuned, then a color matrix and a gamma curve change the picture on screen">
-      <defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="currentColor" style="color: var(--sub)"/></marker></defs>
-      <rect class="box" x="10" y="70" width="150" height="62" rx="10"/>
-      <text x="85" y="97" text-anchor="middle">Display EDID</text>
-      <text class="sub" x="85" y="116" text-anchor="middle">name, color primaries</text>
-      <rect class="box" x="210" y="70" width="150" height="62" rx="10"/>
-      <text x="285" y="97" text-anchor="middle">Auto-tune</text>
-      <text class="sub" x="285" y="116" text-anchor="middle">gamut vs sRGB, OLED?</text>
-      <rect class="box" x="410" y="70" width="150" height="62" rx="10"/>
-      <text x="485" y="97" text-anchor="middle">Preset + sliders</text>
-      <text class="sub" x="485" y="116" text-anchor="middle">your chosen look</text>
-      <rect class="hl" x="610" y="18" width="200" height="62" rx="10"/>
-      <text x="710" y="45" text-anchor="middle">Color matrix</text>
-      <text class="sub" x="710" y="64" text-anchor="middle">Magnification API</text>
-      <rect class="hl" x="610" y="122" width="200" height="62" rx="10"/>
-      <text x="710" y="149" text-anchor="middle">Black-level curve</text>
-      <text class="sub" x="710" y="168" text-anchor="middle">display gamma ramp</text>
-      <path class="arrow" d="M160,101 H206"/>
-      <path class="arrow" d="M360,101 H406"/>
-      <path class="arrow" d="M560,95 C585,95 585,49 606,49"/>
-      <path class="arrow" d="M560,107 C585,107 585,153 606,153"/>
-    </svg>
-  </div>
-
-  <div class="two" style="margin-top:14px">
-    <div class="card">
-      <h3>Color matrix</h3>
-      <p>Windows' Magnification API can apply a 5×5 color matrix to everything on screen. Display Tuner builds one matrix from your settings: saturation (mixing each channel with its luminance), contrast around mid-grey, a brightness offset, and warmth as per-channel gains that only ever reduce a channel, so nothing clips.</p>
-    </div>
-    <div class="card curve">
-      <h3>Black-level curve</h3>
-      <svg viewBox="0 0 260 170" role="img" aria-label="Output against input: the curve dips below the straight line only near black">
-        <line class="axis" x1="30" y1="150" x2="250" y2="150"/><line class="axis" x1="30" y1="150" x2="30" y2="10"/>
-        <path class="ref" d="M30,150 L250,10"/>
-        <path class="line" d="M30,150 C45,149 60,145 78,120 L250,10"/>
-        <text x="140" y="166" text-anchor="middle">input brightness</text>
-        <text x="16" y="80" text-anchor="middle" transform="rotate(-90 16 80)">output</text>
-        <text x="96" y="140">near-black deepened</text>
-      </svg>
-      <p>Only the darkest ~20% of tones are pulled down, through the display's gamma ramp. Mid-tones and highlights are untouched, so dark scenes get deeper without the whole picture turning dim.</p>
+<section id="features">
+  <div class="wrap">
+    <div class="eyebrow">Features</div>
+    <h2 class="display">Small app. Big picture.</h2>
+    <p class="sec-lead">Everything you need to make movies look their best on the screen you already have.</p>
+    <div class="features">
+      <div class="feature">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg></div>
+        <h3>Knows your screen</h3>
+        <p>Reads the data every display reports about itself (EDID): maker, model and color primaries.</p>
+      </div>
+      <div class="feature">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></svg></div>
+        <h3>Auto-tuned presets</h3>
+        <p>Washed-out panels get more color, wide-gamut ones get little. OLED screens skip black deepening.</p>
+      </div>
+      <div class="feature">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 0 0 18z" fill="currentColor"/></svg></div>
+        <h3>Deeper blacks</h3>
+        <p>Only the darkest tones are pulled down, so dark scenes gain depth without the picture going dim.</p>
+      </div>
+      <div class="feature">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg></div>
+        <h3>Works everywhere</h3>
+        <p>Applies screen-wide: video players, browsers, streaming. <kbd>Ctrl</kbd> <kbd>Alt</kbd> <kbd>F</kbd> toggles it.</p>
+      </div>
+      <div class="feature">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/></svg></div>
+        <h3>Truly portable</h3>
+        <p>One 48 KB file. Settings live next to it. Nothing installed, nothing left behind.</p>
+      </div>
+      <div class="feature">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg></div>
+        <h3>Nothing permanent</h3>
+        <p>Exit the app and your colors return to normal instantly. No drivers, no system changes.</p>
+      </div>
     </div>
   </div>
+</section>
 
-  <h2>Auto-tuning</h2>
-  <p>The panel's red, green and blue primaries form a triangle on the CIE color chart. Its area compared with sRGB says how much color the screen can show, and the presets adapt:</p>
-  <div class="table-wrap">
-    <table>
-      <thead><tr><th>Panel type</th><th>Color area vs sRGB</th><th>Extra color (OLED Movie)</th><th>Black level</th></tr></thead>
-      <tbody>
-        <tr><td>Narrow-gamut IPS/TN (typical budget laptop, “45% NTSC”)</td><td class="num">under 75%</td><td class="num">+15%</td><td class="num">35%</td></tr>
-        <tr><td>Mid-gamut</td><td class="num">75–95%</td><td class="num">+8%</td><td class="num">35%</td></tr>
-        <tr><td>sRGB panel</td><td class="num">95–120%</td><td class="num">+4%</td><td class="num">35%</td></tr>
-        <tr><td>Wide-gamut (DCI-P3 and up)</td><td class="num">over 120%</td><td class="num">0%</td><td class="num">35%</td></tr>
-        <tr><td>OLED</td><td class="num">any</td><td class="num">by gamut</td><td class="num">off (already true black)</td></tr>
-      </tbody>
-    </table>
+<section id="presets" class="alt">
+  <div class="wrap">
+    <div class="eyebrow">Presets</div>
+    <h2 class="display">One click for every mood.</h2>
+    <p class="sec-lead">Fourteen presets, each tuned to your panel. Fine-tune brightness, contrast, color, black level and warmth, then save your own default.</p>
+    <div class="presets">
+      <div class="preset"><span class="dot" style="background:#5cc8ff"></span><b>OLED Movie</b><p>The everyday pick for films and series.</p></div>
+      <div class="preset"><span class="dot" style="background:#111;border:1px solid #888"></span><b>True Black</b><p>Deepest blacks: closest to OLED on an LCD.</p></div>
+      <div class="preset"><span class="dot" style="background:#ff4f9a"></span><b>AMOLED Punch</b><p>True-black depth plus phone-style color.</p></div>
+      <div class="preset"><span class="dot" style="background:#3a3a46"></span><b>Deep Black</b><p>Strong black level for night scenes.</p></div>
+      <div class="preset"><span class="dot" style="background:#6b4f3a"></span><b>Dark Room</b><p>Deep and slightly dim for lights-off viewing.</p></div>
+      <div class="preset"><span class="dot" style="background:#4fd18b"></span><b>OLED Vivid</b><p>Extra pop with a cool tone.</p></div>
+      <div class="preset"><span class="dot" style="background:#e3a35b"></span><b>Cinema</b><p>Gentle color, warm film-like white.</p></div>
+      <div class="preset"><span class="dot" style="background:#ff7a59"></span><b>Anime</b><p>Bright, saturated color.</p></div>
+      <div class="preset"><span class="dot" style="background:#35b0ff"></span><b>Sports</b><p>Crisp contrast, cool daylight tone.</p></div>
+      <div class="preset"><span class="dot" style="background:#9b6bff"></span><b>Gaming</b><p>More color without losing shadow detail.</p></div>
+      <div class="preset"><span class="dot" style="background:linear-gradient(90deg,#000,#fff)"></span><b>Noir</b><p>Black and white for classic films.</p></div>
+      <div class="preset"><span class="dot" style="background:#f2d6a2"></span><b>Reading</b><p>Softer color, warm white.</p></div>
+      <div class="preset"><span class="dot" style="background:#ff9a3c"></span><b>Night</b><p>Warm and dimmer, easy on the eyes.</p></div>
+      <div class="preset"><span class="dot" style="background:#c8c8c8"></span><b>Natural</b><p>Your screen exactly as it was.</p></div>
+    </div>
   </div>
+</section>
 
-  <h2>Presets</h2>
-  <div class="grid">
-    <div class="card"><h3>OLED Movie</h3><p>Richer color and deeper near-blacks with a touch more contrast. The everyday pick for films and series.</p></div>
-    <div class="card"><h3>True Black</h3><p>The strongest near-black deepening with a little more contrast, for the closest thing to OLED black on an LCD.</p></div>
-    <div class="card"><h3>AMOLED Punch</h3><p>True-black depth plus extra color, like a phone's AMOLED screen.</p></div>
-    <div class="card"><h3>Dark Room</h3><p>Deep blacks, slightly dimmer and a touch warm, for watching with the lights off.</p></div>
-    <div class="card"><h3>Anime</h3><p>Bright, saturated color with clean lines and light black deepening.</p></div>
-    <div class="card"><h3>Sports</h3><p>Crisp contrast and vivid greens with a cool, daylight tone.</p></div>
-    <div class="card"><h3>Gaming</h3><p>A bit more color and contrast without crushing shadow detail.</p></div>
-    <div class="card"><h3>Noir</h3><p>Black and white with deep blacks, for classic films.</p></div>
-    <div class="card"><h3>Reading</h3><p>Softer color and a warm white for long reading sessions.</p></div>
-    <div class="card"><h3>OLED Vivid</h3><p>Extra color pop and a slightly cool tone, for animation, nature and HDR-style trailers.</p></div>
-    <div class="card"><h3>Cinema</h3><p>Gentler color with a warm, film-like white.</p></div>
-    <div class="card"><h3>Deep Black</h3><p>The strongest black level, for dark scenes and night-time films.</p></div>
-    <div class="card"><h3>Night</h3><p>Warm and a little dimmer, easier on the eyes late at night.</p></div>
-    <div class="card"><h3>Natural</h3><p>No change: your screen exactly as it was.</p></div>
+<section id="how">
+  <div class="wrap">
+    <div class="eyebrow">How it works</div>
+    <h2 class="display">Simple tech, done carefully.</h2>
+    <p class="sec-lead">No drivers and no hacks: just two features built into Windows, driven by your display's own data.</p>
+    <div class="steps">
+      <div class="step"><h3>Read the display</h3><p>Finds the active monitor's EDID through WMI and the registry, then measures the area of its color triangle against sRGB.</p></div>
+      <div class="step"><h3>Shape the color</h3><p>Builds one 5×5 color matrix (saturation, contrast, brightness, warmth) and applies it to the whole screen with the Magnification API.</p></div>
+      <div class="step"><h3>Deepen the blacks</h3><p>Bends only the darkest ~20–30% of tones on the display's gamma ramp, so mid-tones and highlights stay untouched.</p></div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Your panel</th><th>Color area vs sRGB</th><th>Extra color</th><th>Black level</th></tr></thead>
+        <tbody>
+          <tr><td>Narrow-gamut IPS/TN (typical budget laptop, “45% NTSC”)</td><td class="num">under 75%</td><td class="num">+15%</td><td class="num">on</td></tr>
+          <tr><td>Mid-gamut</td><td class="num">75–95%</td><td class="num">+8%</td><td class="num">on</td></tr>
+          <tr><td>sRGB panel</td><td class="num">95–120%</td><td class="num">+4%</td><td class="num">on</td></tr>
+          <tr><td>Wide-gamut (DCI-P3 and up)</td><td class="num">over 120%</td><td class="num">none</td><td class="num">on</td></tr>
+          <tr><td>OLED</td><td class="num">any</td><td class="num">by gamut</td><td class="num">off (already true black)</td></tr>
+        </tbody>
+      </table>
+    </div>
   </div>
+</section>
 
-  <h2>Use it</h2>
-  <div class="card">
-    <p style="color:var(--text)">1. Download <code>DisplayTuner.exe</code> and put it in any folder. 2. Run it and pick a preset. 3. Adjust the sliders if you like, then <b>Save as default</b>. 4. Turn on <b>Start with Windows</b> to have it every time.</p>
-  </div>
-  <p class="note" style="margin-top:12px">Windows SmartScreen may warn about an unknown publisher because the app isn't code-signed. Choose <b>More info → Run anyway</b>, or build it yourself.</p>
-
-  <h2>Build it yourself</h2>
-  <p>It uses the C# compiler that's already part of Windows, so there's nothing to install:</p>
+<section id="faq" class="alt">
+  <div class="wrap two">
+    <div>
+      <div class="eyebrow">Specs</div>
+      <h2 class="display">At a glance.</h2>
+      <ul class="specs">
+        <li><span>Platform</span><span>Windows 10 &amp; 11, 64-bit</span></li>
+        <li><span>Size</span><span>48 KB single .exe</span></li>
+        <li><span>Requirements</span><span>None (.NET Framework is built into Windows)</span></li>
+        <li><span>Presets</span><span>14, auto-tuned</span></li>
+        <li><span>Hotkey</span><span><kbd>Ctrl</kbd> <kbd>Alt</kbd> <kbd>F</kbd></span></li>
+        <li><span>License</span><span>MIT, free and open source</span></li>
+      </ul>
+      <p style="margin-top:22px;color:var(--sub);font-size:15px">Build it yourself with the compiler that ships with Windows:</p>
 <pre><code>git clone https://github.com/KevinLeve/DisplayTuner
 cd DisplayTuner
 powershell -ExecutionPolicy Bypass -File build.ps1</code></pre>
-
-  <h2>Good to know</h2>
-  <div class="grid">
-    <div class="card"><h3>Screenshots look normal</h3><p>The filter changes what the screen shows, not the image itself, so captures and recordings keep the original colors.</p></div>
-    <div class="card"><h3>Protected video and games</h3><p>Some DRM-protected players and exclusive-fullscreen games may bypass the filter.</p></div>
-    <div class="card"><h3>Several monitors</h3><p>The filter applies to every screen; presets are tuned for the main one.</p></div>
+    </div>
+    <div>
+      <div class="eyebrow">FAQ</div>
+      <h2 class="display">Good to know.</h2>
+      <details open><summary>Will it make my screen a real OLED?</summary><p>No LCD can turn its backlight off per pixel, so true OLED black isn't possible. Display Tuner gets you visibly closer: richer color and deeper near-blacks, tuned for your panel.</p></details>
+      <details><summary>Why does Windows SmartScreen warn me?</summary><p>The app isn't code-signed, so Windows doesn't recognise the publisher yet. Choose <b>More info → Run anyway</b>, or build it from source.</p></details>
+      <details><summary>Why do my screenshots look normal?</summary><p>The filter changes what the screen shows, not the image itself, so captures and recordings keep the original colors.</p></details>
+      <details><summary>Does it work with Netflix and games?</summary><p>It works in browsers and video players. Some DRM-protected players and exclusive-fullscreen games may bypass the filter.</p></details>
+      <details><summary>How do I undo it?</summary><p>Press <kbd>Ctrl</kbd> <kbd>Alt</kbd> <kbd>F</kbd>, pick Natural, or exit from the tray icon. Colors return to normal instantly.</p></details>
+      <details><summary>What about several monitors?</summary><p>The filter applies to every screen; presets are tuned for the main display.</p></details>
+    </div>
   </div>
+</section>
 
-  <footer>KevinB's Display Tuner • MIT License</footer>
-</main>
+<section>
+  <div class="wrap">
+    <div class="cta">
+      <h2 class="display">Make tonight's movie look better.</h2>
+      <p class="sec-lead" style="margin:0 auto 26px">Download, double-click, pick a preset. That's it.</p>
+      <div class="ctas"><a class="btn primary" href="https://github.com/KevinLeve/DisplayTuner/releases/latest">Download for Windows</a><a class="btn" href="https://github.com/KevinLeve/DisplayTuner">Star on GitHub</a></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span>© 2026 KevinB's Display Tuner • MIT License</span>
+    <span><a href="https://github.com/KevinLeve/DisplayTuner">GitHub</a> • <a href="https://github.com/KevinLeve/DisplayTuner/releases">Releases</a> • <a href="https://github.com/KevinLeve/DisplayTuner/issues">Report an issue</a></span>
+    <span style="width:100%">Film stills for comparison only: Peaky Blinders © BBC / Caryn Mandabach Productions; F1 The Movie © Apple / Warner Bros.</span>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var credits = { peaky: "Peaky Blinders S6E6 © BBC / Caryn Mandabach Productions.", f1: "F1 The Movie (2025) © Apple / Warner Bros." };
+  var state = { scene: "peaky", preset: "true-black" };
+  var box = document.getElementById("cmp"), before = document.getElementById("cmp-before"), after = document.getElementById("cmp-after");
+  var line = document.getElementById("cmp-line"), range = document.getElementById("cmp-range");
+  function setPos(p) {
+    p = Math.max(0, Math.min(100, p));
+    after.style.clipPath = "inset(0 0 0 " + p + "%)";
+    line.style.left = p + "%";
+    range.value = p;
+  }
+  function load() {
+    before.src = "compare/" + state.scene + "-original.jpg";
+    after.src = "compare/" + state.scene + "-" + state.preset + ".jpg";
+    document.getElementById("cmp-caption").textContent = credits[state.scene];
+  }
+  // preload every image so switching is instant
+  ["peaky", "f1"].forEach(function (s) {
+    ["original", "oled-movie", "true-black", "amoled-punch", "oled-vivid", "cinema"].forEach(function (p) { new Image().src = "compare/" + s + "-" + p + ".jpg"; });
+  });
+  document.querySelectorAll(".cmp-controls .chip").forEach(function (b) {
+    b.addEventListener("click", function () {
+      var group = b.dataset.scene ? "scene" : "preset";
+      document.querySelectorAll("[data-" + group + "]").forEach(function (x) { x.classList.toggle("on", x === b); });
+      state[group] = b.dataset[group];
+      if (group === "preset") document.getElementById("cmp-label").textContent = b.textContent;
+      load();
+    });
+  });
+  var dragging = false;
+  function fromEvent(e) { var r = box.getBoundingClientRect(); setPos((e.clientX - r.left) / r.width * 100); }
+  box.addEventListener("pointerdown", function (e) { dragging = true; box.setPointerCapture(e.pointerId); fromEvent(e); });
+  box.addEventListener("pointermove", function (e) { if (dragging) fromEvent(e); });
+  box.addEventListener("pointerup", function () { dragging = false; });
+  box.addEventListener("pointercancel", function () { dragging = false; });
+  range.addEventListener("input", function () { setPos(parseFloat(range.value)); });
+  setPos(50);
+})();
+</script>
 </body>
 </html>
