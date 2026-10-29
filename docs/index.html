@@ -3,12 +3,70 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>KevinB's Display Tuner</title>
-<meta name="description" content="Give your ordinary LCD or IPS laptop screen an edge: OLED and AMOLED-style tuning effects, auto-tuned to your display. Free, portable, open source.">
-<meta property="og:title" content="KevinB's Display Tuner">
-<meta property="og:description" content="OLED and AMOLED-style tuning effects for ordinary laptop screens, auto-tuned to your display.">
-<meta property="og:image" content="compare-peaky.jpg">
+<title>KevinB's Display Tuner – Free OLED-Style Screen Filter for Windows Laptops</title>
+<meta name="description" content="KevinB's Display Tuner is a free, portable Windows app that makes an ordinary LCD or IPS laptop screen look closer to OLED and AMOLED: deeper blacks, richer color, 14 presets, auto-tuned to your display.">
+<meta name="keywords" content="KevinB's Display Tuner, Display Tuner, OLED filter, AMOLED effect, true black, laptop screen color, IPS color correction, screen color filter Windows, display calibration, deeper blacks, saturation boost, Windows 11 display tool, 45% NTSC panel, movie mode">
+<meta name="author" content="KevinLeve">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta name="theme-color" content="#0b0b0d">
+<link rel="canonical" href="https://kevinleve.github.io/DisplayTuner/">
 <link rel="icon" href="icon.png">
+<link rel="apple-touch-icon" href="icon.png">
+
+<!-- Social sharing (WhatsApp, Discord, X, LinkedIn, Facebook) -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="KevinB's Display Tuner">
+<meta property="og:title" content="KevinB's Display Tuner – Give your laptop screen an OLED edge">
+<meta property="og:description" content="Free Windows app: OLED and AMOLED-style tuning effects for ordinary laptop screens. Deeper blacks, richer color, auto-tuned to your display.">
+<meta property="og:url" content="https://kevinleve.github.io/DisplayTuner/">
+<meta property="og:image" content="https://kevinleve.github.io/DisplayTuner/og-image.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="KevinB's Display Tuner app window with OLED presets">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="KevinB's Display Tuner – Give your laptop screen an OLED edge">
+<meta name="twitter:description" content="Free Windows app: OLED and AMOLED-style tuning for ordinary laptop screens, auto-tuned to your display.">
+<meta name="twitter:image" content="https://kevinleve.github.io/DisplayTuner/og-image.jpg">
+
+<!-- Structured data: lets Google show it as a software result with price, OS and FAQ -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "KevinB's Display Tuner",
+  "alternateName": "Display Tuner",
+  "description": "Free, portable Windows app that gives ordinary LCD and IPS laptop screens an OLED and AMOLED-style look: deeper blacks, richer color and 14 presets, auto-tuned to the detected display.",
+  "applicationCategory": "UtilitiesApplication",
+  "applicationSubCategory": "Display color filter",
+  "operatingSystem": "Windows 10, Windows 11",
+  "softwareVersion": "1.0.0",
+  "fileSize": "48 KB",
+  "url": "https://kevinleve.github.io/DisplayTuner/",
+  "downloadUrl": "https://github.com/KevinLeve/DisplayTuner/releases/latest/download/DisplayTuner.exe",
+  "installUrl": "https://github.com/KevinLeve/DisplayTuner/releases/latest/download/DisplayTuner.exe",
+  "screenshot": "https://kevinleve.github.io/DisplayTuner/screenshot.png",
+  "image": "https://kevinleve.github.io/DisplayTuner/og-image.jpg",
+  "license": "https://opensource.org/licenses/MIT",
+  "isAccessibleForFree": true,
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "author": { "@type": "Person", "name": "KevinLeve", "url": "https://github.com/KevinLeve" },
+  "sameAs": ["https://github.com/KevinLeve/DisplayTuner"],
+  "featureList": ["OLED Movie, True Black and AMOLED Punch presets", "Automatic display detection via EDID", "Deeper near-black levels", "Saturation, contrast, brightness and warmth sliders", "Ctrl+Alt+F global toggle", "Portable single file, no install"]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    { "@type": "Question", "name": "Will Display Tuner make my laptop screen a real OLED?", "acceptedAnswer": { "@type": "Answer", "text": "No LCD can turn its backlight off per pixel, so true OLED black isn't possible. Display Tuner gets visibly closer with richer color and deeper near-blacks, tuned for your panel." } },
+    { "@type": "Question", "name": "Is Display Tuner free?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. It is free and open source under the MIT license, a portable 48 KB file for Windows 10 and 11." } },
+    { "@type": "Question", "name": "Why does Windows SmartScreen warn about Display Tuner?", "acceptedAnswer": { "@type": "Answer", "text": "The app isn't code-signed yet, so Windows doesn't recognise the publisher. Choose More info, then Run anyway, or build it from source." } },
+    { "@type": "Question", "name": "Does Display Tuner work with Netflix and games?", "acceptedAnswer": { "@type": "Answer", "text": "It works in browsers and video players. Some DRM-protected players and exclusive-fullscreen games may bypass the filter." } },
+    { "@type": "Question", "name": "How do I turn Display Tuner off?", "acceptedAnswer": { "@type": "Answer", "text": "Press Ctrl+Alt+F, pick the Natural preset, or exit from the tray icon. Colors return to normal instantly." } }
+  ]
+}
+</script>
 <style>
   :root {
     --bg: #f7f7f8; --bg2: #ffffff; --card: #ffffff; --stroke: rgba(0,0,0,.08); --stroke2: rgba(0,0,0,.14);
