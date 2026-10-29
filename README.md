@@ -12,7 +12,7 @@ A tiny portable Windows app that **gives an ordinary LCD/IPS laptop screen an ed
 
 ## Download
 
-Grab `DisplayTuner.exe` from the [Releases](../../releases) page and run it. Windows 10 or 11, 64-bit.
+**[Download DisplayTuner.exe](https://github.com/KevinLeve/DisplayTuner/releases/latest/download/DisplayTuner.exe)** (always the latest version) and run it, or see all versions on the [Releases](../../releases) page. Windows 10 or 11, 64-bit.
 
 > Windows SmartScreen may warn about an unknown publisher because the app isn't code-signed. Click **More info → Run anyway**, or build it yourself from source (below).
 
