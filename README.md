@@ -1,6 +1,6 @@
 # KevinB's Display Tuner
 
-A tiny portable Windows app that gives an ordinary laptop screen an **OLED-style picture for movies**: richer color, deeper near-blacks, and a few one-click presets. It reads your display's own data (EDID) and **tunes the presets automatically** for that panel.
+A tiny portable Windows app that **gives an ordinary LCD/IPS laptop screen an edge**: its tuning effects bring the picture closer to the look of an **OLED or AMOLED display**, with richer color, deeper near-blacks and one-click presets. It reads your display's own data (EDID) and **tunes the presets automatically** for that panel.
 
 ![KevinB's Display Tuner window](docs/screenshot.png)
 
